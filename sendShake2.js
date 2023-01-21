@@ -1,3 +1,7 @@
+const { core } = require("oicq")
+const crypto = require('crypto');
+
+
 async function sendShake2(source_group_id) {
     let body = {
         "1": {
