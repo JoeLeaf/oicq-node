@@ -57,3 +57,5 @@ async function sendShake(source_group_id, id) {
     body = core.pb.encode(body)
     await bot.sendUni("MessageSvc.PbSendMsg", body);
 }
+//啊发现oicq有可以这样发[{"type":"shake","id":1,"text":"戳一戳"}]
+
