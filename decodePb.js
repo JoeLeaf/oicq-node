@@ -9,17 +9,16 @@ str = str.replace(/\s+/g, "");
 if (str.substring(0, 4) == "0000") {
   str = str.substring(8);
 }
-
 let json = await decodePb(Buffer.from(str, 'hex'));
-
 */
+
 
 async function decodePb(buffer_data) {
     let pb = core.pb;
     let proto = pb.decode(buffer_data);
     let json = {}
     delete proto.encoded;
-    //console.log("xyz调试",pb.decode(proto[3][1][2][1][1][1]));
+    //console.log("小叶子调试",pb.decode(proto[3][1][2][1][1][1]));
     let index = 0;
     function decode(proto, json) {
         for (let key in proto) {
@@ -48,7 +47,13 @@ async function decodePb(buffer_data) {
                     }
                 }
             } else {
-                json[key] = proto[key];
+                //console.log("小叶子调试",proto[key]);
+                let value = proto[key];
+                if (typeof value == "bigint") {
+                    value = value.toString();
+                    value = Number(value);
+                }
+                json[key] = value
             }
         }
     }
