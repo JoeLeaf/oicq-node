@@ -1,7 +1,8 @@
 const { core } = require("oicq")
 const crypto = require('crypto');
 
-
+//2023-01-24 
+//发送第30行可以设置动画大小,最大就是3
 async function sendShake(source_group_id, id) {
     let body = {
         "1": {
@@ -26,7 +27,7 @@ async function sendShake(source_group_id, id) {
                                 "4": crypto.randomBytes(4).readUInt16BE(),
                                 "5": "",
                                 "6": "",
-                                "7": 0,
+                                "7": 3,
                                 "10": 0
                             },
                             "3": id
