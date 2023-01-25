@@ -37,6 +37,30 @@ async function decodePb(buffer_data) {
 				} else {
 					try {
 						if (pb.decode(proto[key].encoded) == null) {
+							if (data.length > 3) {
+								let Prefix = ""
+								if (data[0] == 0x01 || data[0] == 0x00) {
+									Prefix = data.toString("hex").slice(0, 2);
+									data = data.slice(1);
+								}
+								let data_json = {}
+								data_json.Prefix = Prefix
+								if (data[0] == 0x78 && data[1] == 0x9c) {
+									Deflatedata = zlib.unzipSync(data);
+									// data_json.RawData = proto[key].encoded;
+									// data_json.DecompressedData =Deflatedata;
+									// data_json.CompressType = "Deflate"
+									data_json.txt = Deflatedata.toString();
+									data_json.tip = "数据被加密过,使用时请把数据加密回去 deflateSync()"
+									json[key] = data_json
+									decode(proto[key], json[key]);
+									continue;
+								} else {
+									json[key] = proto[key].encoded.toString();
+									decode(proto[key], json[key]);
+									continue;
+								}
+							}
 							json[key] = proto[key].encoded.toString();
 							decode(proto[key], json[key]);
 							continue;
@@ -59,8 +83,8 @@ async function decodePb(buffer_data) {
 								// data_json.DecompressedData =Deflatedata;
 								// data_json.CompressType = "Deflate"
 								data_json.txt = Deflatedata.toString();
-								data_json.tip ="数据被加密过,使用时请把数据加密回去 deflateSync()"
-								json[key]=data_json
+								data_json.tip = "数据被加密过,使用时请把数据加密回去 deflateSync()"
+								json[key] = data_json
 								decode(proto[key], json[key]);
 								continue;
 							} else {
