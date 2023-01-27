@@ -1,0 +1,86 @@
+如果想要获取tenpay.com域名的cookies需要更改oicq源码
+
+对登录协议:tlv511包进行修改
+
+如果直接修改源码请打开:oicq\lib\core\tlv.js
+
+我这里用我js的举例子
+
+代码大约在290行
+
+原代码
+
+    0x511: function () {
+        const domains = new Set([
+            "aq.qq.com",
+            "buluo.qq.com",
+            "connect.qq.com",
+            "docs.qq.com",
+            "game.qq.com",
+            "gamecenter.qq.com",
+            // "graph.qq.com",
+            "haoma.qq.com",
+            "id.qq.com",
+            // "imgcache.qq.com",
+            "kg.qq.com",
+            "mail.qq.com",
+            "mma.qq.com",
+            "office.qq.com",
+            // "om.qq.com",
+            "openmobile.qq.com",
+            "qqweb.qq.com",
+            "qun.qq.com",
+            "qzone.qq.com",
+            "ti.qq.com",
+            "v.qq.com",
+            "vip.qq.com",
+            "y.qq.com",
+        ]);
+        const stream = new writer_1.default().writeU16(domains.size);
+        for (let v of domains)
+            stream.writeU8(0x01).writeTlv(v);
+        return stream;
+    }
+    
+    
+    
+    
+    
+    修改后
+    
+    
+    0x511: function () {
+        const domains = new Set([
+			"tenpay.com",
+            "aq.qq.com",
+            "buluo.qq.com",
+            "connect.qq.com",
+            "docs.qq.com",
+            "game.qq.com",
+            "gamecenter.qq.com",
+            // "graph.qq.com",
+            "haoma.qq.com",
+            "id.qq.com",
+            // "imgcache.qq.com",
+            "kg.qq.com",
+            "mail.qq.com",
+            "mma.qq.com",
+            "office.qq.com",
+            // "om.qq.com",
+            "openmobile.qq.com",
+            "qqweb.qq.com",
+            "qun.qq.com",
+            "qzone.qq.com",
+            "ti.qq.com",
+            "v.qq.com",
+            "vip.qq.com",
+            "y.qq.com",
+        ]);
+        const stream = new writer_1.default().writeU16(domains.size);
+        for (let v of domains)
+            stream.writeU8(0x01).writeTlv(v);
+        return stream;
+    }
+    
+    
+    增加代码:			"tenpay.com",
