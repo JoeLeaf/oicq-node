@@ -63,26 +63,7 @@ client.on("internal.sso", function (cmd, payload, seq) {
                         GroupMsg.HB_RawData = proto['1']['3']['1']['2'][1]['24'].encoded.toString("hex").toUpperCase()
 
                         let qun = client.pickGroup(GroupMsg.GroupNumber);
-                        //编写抢红包代码
-                        const url = "https://mqq.tenpay.com/cgi-bin/hongbao/qpay_hb_na_grap.cgi?ver=2.0&chv=3"
-                        let body = {
-                            "authkey": GroupMsg.HB_authkey,
-                            "hb_from": "0",
-                            "agreement": "0",
-                            "pay_flag": "0",
-                            "groupid": String(GroupMsg.GroupNumber),
-                            "channel": "1",
-                            "pre_grap_token": "rand=53b48b24565872e7fd6a1e95b16e3f5f&sign=86988f1d3e7e61ca242ea424be98bab5&ts=1674736734&ver=1",
-                            "senderuin": String(GroupMsg.SenderQQ),
-                            "listid": GroupMsg.HB_ID,
-                            "skey_type": "2",
-                            "grouptype": "1",
-                            "trans_seq": "13",
-                            "groupuin": String(GroupMsg.SenderQQ),
-                            "name": Bot.nickname,
-                            "skey": "xxxx",
-                            "uin": Bot.uin
-                        }
+                        
 
                         //qun.sendMsg(JSON.stringify(body, null, "\t"));
 
