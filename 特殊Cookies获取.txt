@@ -49,11 +49,11 @@
     修改后
     
     
-    0x511: function () {
+0x511: function () {
         const domains = new Set([
 			"tenpay.com",
             "aq.qq.com",
-            "buluo.qq.com",
+            //"buluo.qq.com",
             "connect.qq.com",
             "docs.qq.com",
             "game.qq.com",
@@ -84,3 +84,5 @@
     
     
     增加代码:			"tenpay.com",
+    注销代码:			//"buluo.qq.com",
+    
