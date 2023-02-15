@@ -1,7 +1,6 @@
 const { core } = require("oicq")
 const crypto = require('crypto');
 
-
 //type 1为私聊 0为群聊
 //看到xyz或者小叶子 表示都可以传值,但是我没有数据,就直接固定,影响不大
 async function sendBigEmoticons(recipient, id, type = 0) {
@@ -61,3 +60,15 @@ async function sendBigEmoticons(recipient, id, type = 0) {
 	body = core.pb.encode(body)
 	await bot.sendUni("MessageSvc.PbSendMsg", body);
 }
+/*
+如果去我lib文件夹复制文件替换你的
+converter.js	elements.d.ts	converter.d.ts	elements.js	parser.js
+文件可以使用
+使用方法
+const message = [
+	segment.lottie(343,"/我方了")
+]
+
+[{"type":"lottie","id":343,"text":"/我方了"}]
+
+*/
