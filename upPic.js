@@ -1,3 +1,5 @@
+//用于做图床,或者卡片限制之类的
+
 async function upPicturesToQz(cookies, picture_base64) {
     const uin = getCookieValue(cookies, "uin")
     const skey = getCookieValue(cookies, "skey")
@@ -32,6 +34,38 @@ async function upPicturesToQz(cookies, picture_base64) {
     console.log(match[1]);
     return match[1]
 }
-//用于一些json卡片域名限制
 //高清域名地址:http://r.photo.store.qq.com/
 
+
+async function upPicTxc(pic, cookie) {
+    //判断pic是否是blob
+    if (!pic instanceof Blob)
+        return "pic不是blob";
+    //读取pic的文件名和文件类型
+    let fileName = "xyz." + pic.type.match(/\/(\w+)$/)[1];
+    //创建formData
+    let formData = new FormData();
+    //添加参数
+    formData.append('type', 'reply');
+    formData.append('upload', pic, fileName);
+    //发送请求
+    let res = await fetch("https://support.qq.com/api/v1/" + 108995 +"/posts/upload/images", {
+        "headers": {
+            "cookie": cookie,
+            "Referer": "https://support.qq.com/product/" + 108995,
+            "Referrer-Policy": "strict-origin-when-cross-origin"
+        },
+        "body": formData,
+        "method": "POST"
+    });
+    //108995可以换点,解决上传频繁
+    //获取返回的json
+    let json = await res.json();
+    //判断json.data是数组还是对象
+    if (json.data instanceof Array)
+        return "上传失败" + json.message;
+    return json.data.image_url;
+}
+//https://txc.gtimg.com/data/507956/2023/0219/d890ccbd40a0db411bc3862295519757.jpeg
+//https://txc.qq.com/data/507956/2023/0219/d890ccbd40a0db411bc3862295519757.jpeg
+//把gtimg替换为qq
