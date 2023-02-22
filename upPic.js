@@ -37,6 +37,9 @@ async function upPicturesToQz(cookies, picture_base64) {
 //高清域名地址:http://r.photo.store.qq.com/
 
 
+
+
+
 async function upPicTxc(pic, cookie) {
     //判断pic是否是blob
     if (!pic instanceof Blob)
@@ -69,3 +72,106 @@ async function upPicTxc(pic, cookie) {
 //https://txc.gtimg.com/data/507956/2023/0219/d890ccbd40a0db411bc3862295519757.jpeg
 //https://txc.qq.com/data/507956/2023/0219/d890ccbd40a0db411bc3862295519757.jpeg
 //把gtimg替换为qq
+/*
+使用方法
+
+const response = await fetch(图片url, { method: 'GET' });
+const contentType = response.headers.get('content-type');
+const buffer = await response.arrayBuffer();
+
+//把图片buffer塞进Blob,blob是node18之后的,因为18之后的formData只能塞blob......
+const pic = new Blob([buffer], { type: contentType });
+const url = await upPicTxc(pic, "_tucao_session=xxxxx")
+
+*/
+
+async function upGroupjobPic(qun_cookies, pic_base64) {
+    const skey = getCookieValue(qun_cookies, "skey")
+    let url = "https://qun.qq.com/cgi-bin/hw/util/image"
+    let response = await fetch_a(url, {
+        credentials: 'include',
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': '*/*',
+            cookie: qun_cookies,
+            'origin': 'https://qun.qq.com',
+            'referer': 'https://qun.qq.com/homework/p/features/index.html',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) QQ/9.7.1.28934 Chrome/43.0.2357.134 Safari/537.36 QBCore/3.43.1298.400 QQBrowser/9.0.2524.400'
+        },
+        body: "pic=" + encodeURIComponent(pic_base64) + "&client_type=1&bkn=" + getG_TK(skey),
+    })
+    return await response.json()
+}
+/*
+http://p.qpic.cn/
+*/
+
+async function upPicMail(url, sid) {
+    const response = await fetch(url, { method: 'GET' });
+    const contentType = response.headers.get('content-type');
+    let fileName = "xyz." + contentType.match(/\/(\w+)$/)[1];
+    const pic = await response.arrayBuffer();
+    let res = await fetch(`https://mail.qq.com/cgi-bin/note_upload?t=qmfileuploadnew&ef=qdata&sid=${sid.qm_sid}&resp_charset=UTF8&mode=file&widthlimit=0&heightlimit=0&sizelimit=0&type=upfile&filetype=pic&business=notebook`, {
+        "headers": {
+            "content-type": "application/octet-stream",
+            "x-qqmail-filename": fileName,
+            "cookie": "sid=" + sid.sid,
+            "Referer": "https://mail.qq.com/",
+            "Referrer-Policy": "origin",
+        },
+        "body": pic,
+        "method": "POST"
+    });
+    res = await res.text();
+    let viewfileurl = res.match(/viewfileurl="(.+?)"/)[1];
+    return viewfileurl;
+}
+async function getMailSid(mailCookies) {
+    const loginWapUrl = "https://wap.mail.qq.com/login/login?auth_type=3&qq_target="
+    const res = await fetch(loginWapUrl, {
+        "headers": {
+            "cookie": mailCookies,
+        },
+        "method": "GET",
+        "redirect": "manual"
+    });
+    let loginCK = res.headers.get("set-cookie");
+    const xm_skey = "xm_skey=" + loginCK.match(/xm_skey=(.*?);/)[1];
+    const loginSid = res.headers.get("Location").match(/sid=(\w+)/)[1];
+    let SidUrl = `https://wap.mail.qq.com/login/exchangeticket?sid=${loginSid}&r=0&func=10`
+    const res1 = await fetch(SidUrl, {
+        "headers": {
+            "cookie": xm_skey,
+        },
+        "method": "GET",
+        "redirect": "manual"
+    });
+    const cookie1 = res1.headers.get("set-cookie");
+    cookie1.replace(/qm_muti_sid=(.*?);/, "");
+    const sid = cookie1.match(/sid=(.*?);/)[1];
+    let json = await res1.json();
+    const qm_sid = json.body.qm_sid;
+    return {
+        "sid": sid,
+        "qm_sid": qm_sid
+    };
+}
+
+//使用方法
+/*
+const mail_cookies = bot.cookies['mail.qq.com']
+const sid = await getMailSid(mail_cookies)
+const url= await upPicMail(图片url,sid)
+
+http://p.qlogo.cn/
+*/
+
+
+
+
+
+
+
+
+
