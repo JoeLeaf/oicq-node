@@ -1,5 +1,3 @@
-const fetch = require("node-fetch");
-
 /*
 
 使用方法
@@ -9,11 +7,65 @@ let Region = "巨神峰"
 let str = await getLOLFreeTreasureChest(Region, bot.cookies['game.qq.com'])
 str += "\n"
 str += await getLOLWalletInformation(Region, bot.cookies['game.qq.com'])
-
 console.log(str)
 */
 
+/*
+定时方法,全区
 
+cron.schedule('1 0 * * *', async () => {
+    try {
+        let array = {
+            "1": "艾欧尼亚  电信",
+            "2": "比尔吉沃特  网通",
+            "3": "祖安 电信",
+            "4": "诺克萨斯  电信",
+            "5": "班德尔城 电信",
+            "6": "德玛西亚 网通",
+            "7": "皮尔特沃夫 电信",
+            "8": "战争学院 电信",
+            "9": "弗雷尔卓德 网通",
+            "10": "巨神峰 电信",
+            "11": "雷瑟守备 电信",
+            "12": "无畏先锋 网通",
+            "13": "裁决之地 电信",
+            "14": "黑色玫瑰 电信",
+            "15": "暗影岛 电信",
+            "16": "恕瑞玛 网通",
+            "17": "钢铁烈阳 电信",
+            "18": "水晶之痕 电信",
+            "19": "均衡教派",
+            "20": "扭曲丛林 网通",
+            "21": "教育网专区",
+            "22": "影流 电信",
+            "23": "守望之海 电信",
+            "24": "征服之海 电信",
+            "25": "卡拉曼达 电信",
+            "26": "巨龙之巢 网通",
+            "27": "皮城警备 电信",
+            "30": "男爵领域 全网络"
+        }
+        let str = ""
+        let game_cookie = bot.cookies['game.qq.com']
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms))
+        }
+        for (let i = 1; i < 31; i++) {
+            if (array[i]) {
+                const element = array[i];
+                str += "大区:" + element + "\n"
+                str += await getLOLFreeTreasureChest(element, game_cookie)
+                str += "\n\n"
+                await sleep(1000)
+            }
+        }
+        let qun = client.pickGroup(148651459);
+        await qun.sendMsg(str);
+    } catch {
+        console.log("xyz:定时任务有问题哦~");
+    }
+});
+*/
 
 
 //领取英雄联盟免费宝箱和查钱包信息
