@@ -175,3 +175,17 @@ async function SubmitHD(cookies, subActId, num = 1, type = 1, qq = "", url = "")
     console.log(str);
     return str;
 }
+function getG_TK(p_skey) {
+    var t = p_skey,
+        e = 5381;
+    if (!t)
+        return "";
+    for (var n = 0; n < t.length; n++)
+        e += (e << 5) + t.charCodeAt(n);
+    return 2147483647 & e
+}
+function getCookieValue(cookies, key) {
+    var e = new RegExp("(?:^| )" + key + "=([^;]*)(?:;|$)", "gi"),
+        n = e.exec(cookies);
+    return n ? unescape(n[1]) : ""
+}
