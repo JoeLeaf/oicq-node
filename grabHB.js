@@ -88,12 +88,10 @@ client.on("internal.sso", function (cmd, payload, seq) {
                         }
                         qun.recallMsg(GroupMsg.seq, GroupMsg.rand)
                         //撤回红包消息
-                        decodePb(payload).then((json) => {
-                            fs.writeFile("hb.txt", JSON.stringify(json) + payload.toString("hex").toUpperCase(), (err, data) => { if (err) throw err; });
-                        });
                     }
                 }
             }
+            //这里解析储存所有消息,用来直接拿数据分析,可删除
             decodePb(payload).then((json) => {
                 fs.writeFile("test.txt", JSON.stringify(json) + payload.toString("hex").toUpperCase(), (err, data) => { if (err) throw err; });
             });
