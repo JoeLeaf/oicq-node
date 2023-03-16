@@ -92,7 +92,7 @@ async function Points_SignIn(cookie) {
     });
     const response2_json = await response2.json();
     if (response2_json.data.code == 0) {
-        return response2.data.data.op[0].packet[0].widgets[0].name
+        return response2.data.op[0].packet[0].widgets[0].name
     } else {
         return response2_json.data.msg
     }
