@@ -1,6 +1,8 @@
 /*
 by:xyz
 time:2023-05-04 23:51
+
+原神例子
 太离谱了,写麻了,使用方法例子在最下面
 */
 const sharp = require("sharp");
