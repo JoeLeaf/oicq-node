@@ -102,8 +102,8 @@ async function login_QZ() {
     }
     let time = new Date().getTime()
     time = time.toString().substr(0, 10)
-    const url = `https://ssl.ptlogin2.qq.com/ptqrshow?appid=716027609&e=2&l=M&s=4&d=72&v=4&t=0.5409099${time}&daid=5&pt_3rd_aid=100384226`
-    const res = await fetch(url, { "method": "GET", "redirect": "manual", "headers": { "Referer": "https://xui.ptlogin2.qq.com/cgi-bin/xlogin?daid=5&hide_title_bar=1&low_login=0&qlogin_auto_login=1&no_verifyimg=1&link_target=blank&target=self&s_url=https:%2F%2Fqzs.qq.com%2Fqzone%2Fv5%2Floginsucc.html?para%3Dizone&pt_no_auth=0&appid=716027609&pt_3rd_aid=100384226" } })
+    const url = `https://ssl.ptlogin2.qq.com/ptqrshow?appid=549000912&e=2&l=M&s=3&d=72&v=4&t=0.775165${time}&daid=5&pt_3rd_aid=0&u1=https://qzs.qq.com/qzone/v5/loginsucc.html?para=izone`
+    const res = await fetch(url, { "method": "GET", "redirect": "manual", "headers": { "Referer": "https://xui.ptlogin2.qq.com/" } })
     const cookies = res.headers.get("set-cookie")
     const qrsig = getCookieValue(cookies, "qrsig")
     login.qrsig = qrsig
@@ -118,7 +118,7 @@ async function check_QZ(qrsig) {
     }
     let time = new Date().getTime()
     time = time.toString().substr(0, 10)
-    const url = `https://ssl.ptlogin2.qq.com/ptqrlogin?u1=https%3A%2F%2Fqzs.qq.com%2Fqzone%2Fv5%2Floginsucc.html%3Fpara%3Dizone&ptqrtoken=${getqrtoken(qrsig)}&ptredirect=0&h=1&t=1&g=1&from_ui=1&ptlang=2052&action=0-0-${time}0000&js_ver=21073010&js_type=1&login_sig=&pt_uistyle=40&aid=716027609&daid=5&pt_3rd_aid=100384226&`
+    const url = `https://ssl.ptlogin2.qq.com/ptqrlogin?u1=https%3A%2F%2Fqzs.qq.com%2Fqzone%2Fv5%2Floginsucc.html%3Fpara%3Dizone&ptqrtoken=${getqrtoken(qrsig)}&ptredirect=0&h=1&t=1&g=1&from_ui=1&ptlang=2052&action=0-0-${time}0000&js_ver=21073010&js_type=1&login_sig=&pt_uistyle=40&aid=549000912&daid=5&pt_3rd_aid=0&`
     const res = await fetch(url, {
         "headers": {
             "cookie": `qrsig=${qrsig};`
@@ -132,11 +132,11 @@ async function check_QZ(qrsig) {
         let cookies = res.headers.get("set-cookie").split(";,").map((item) => { return item.split(";")[0] }).join(";") + ";"
         const url = data[2]
         const uin = url.match(/uin=(\d+)/)[1]
-        const Referer = "https://qzs.qq.com/qzone/v5/loginsucc.html?para=izone&f_url=&ptlang=2052&ptredirect=100&aid=716027609&daid=5&j_later=0&low_login_hour=0&regmaster=0&pt_login_type=3&pt_aid=0&pt_aaid=16&pt_light=0&pt_3rd_aid=100384226"
+        const Referer = "https://qzs.qq.com/qzone/v5/loginsucc.html?para=izone&f_url=&ptlang=2052&ptredirect=100&aid=549000912&daid=5&j_later=0&low_login_hour=0&regmaster=0&pt_login_type=3&pt_aid=0&pt_aaid=16&pt_light=0&pt_3rd_aid=0"
         let response = await fetch(url, { "headers": { "cookie": cookies, "Referer": Referer }, "method": "GET", "redirect": "manual" })
         cookies += response.headers.get("set-cookie").split(";,").map((item) => { return item.split(";")[0] }).join(";") + ";"
         cookies = cookies.split(";").filter((item, index, arr) => { return arr.indexOf(item) == index }).join(";")
-        await fetch("https://qzs.qq.com/qzone/v5/loginsucc.html?para=izone&f_url=&ptlang=2052&ptredirect=100&aid=716027609&daid=5&j_later=0&low_login_hour=0&regmaster=0&pt_login_type=3&pt_aid=0&pt_aaid=16&pt_light=0&pt_3rd_aid=100384226", { "headers": { "cookie": cookies, "Referer": url }, "method": "GET", "redirect": "manual" })
+        await fetch("https://qzs.qq.com/qzone/v5/loginsucc.html?para=izone&f_url=&ptlang=2052&ptredirect=100&aid=549000912&daid=5&j_later=0&low_login_hour=0&regmaster=0&pt_login_type=3&pt_aid=0&pt_aaid=16&pt_light=0&pt_3rd_aid=0", { "headers": { "cookie": cookies, "Referer": url }, "method": "GET", "redirect": "manual" })
         await fetch("https://user.qzone.qq.com/" + uin, { "headers": { "cookie": cookies, "Referer": url }, "method": "GET", "redirect": "manual" })
         check.code = 0
         check.msg = "登录成功！"
