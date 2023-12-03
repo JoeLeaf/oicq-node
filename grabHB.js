@@ -7,7 +7,7 @@
 sb给爷死!
 
 
-89行         qun.recallMsg(GroupMsg.seq, GroupMsg.rand)      可以撤回红包消息
+91行         qun.recallMsg(GroupMsg.seq, GroupMsg.rand)      可以撤回红包消息
 
 
 */
@@ -17,14 +17,14 @@ client.on("internal.sso", function (cmd, payload, seq) {
         if (cmd == "OnlinePush.PbPushGroupMsg") {
             let proto = core.pb.decode(payload)
             let GroupMsg = {};
-            GroupMsg.seq = proto[1][1][5]
-            GroupMsg.rand = proto[1][3][1][1][3]
-            if (proto[1][3][1][2][0][8]) {
+            GroupMsg.seq = proto["1"]["1"]["5"];
+            GroupMsg.rand = proto["1"]["3"]["1"][1]["3"];
+            if (proto["1"]["3"]["1"]["2"][0]["8"]) {
                 //console.log("图片消息");
             } else {
-                GroupMsg.typeface = proto[1][3][1][1][9].toString();
+                GroupMsg.typeface = proto["1"]["3"]["1"][1]["9"].toString();
                 //proto[1][3][1][2][0][2]   1为文本消息 2为表情消息
-                if (proto[1][3][1][2][0][1]) {
+                if (proto["1"]["3"]["1"]["2"][0]["1"]) {
                     GroupMsg.msg = proto['1']['3']['1']['2'][0]['1']['1'].toString()
                     if (GroupMsg.typeface == "Times New Roman" && GroupMsg.msg.indexOf("[QQ红包]") != -1) {
                         GroupMsg.SenderQQ = proto['1']['1']['1']
@@ -50,7 +50,7 @@ client.on("internal.sso", function (cmd, payload, seq) {
                                         break;
                                     case 16:
                                         GroupMsg.HB_TypeTitle += '[专属]';
-                                        GroupMsg.HB_ToUin = String(proto[1][3][1][2][1][24][1][20]);
+                                        GroupMsg.HB_ToUin = String(proto["1"]["3"]["1"]["2"][1]["24"]["1"]["20"]);
                                         break;
                                     case 26:
                                         GroupMsg.HB_TypeTitle += '[语音口令]';
@@ -76,6 +76,7 @@ client.on("internal.sso", function (cmd, payload, seq) {
                         }
                         GroupMsg.HB_RawData = proto['1']['3']['1']['2'][1]['24'].encoded.toString("hex").toUpperCase()
                         let qun = client.pickGroup(GroupMsg.GroupNumber)
+                        //这里是我检测是我自己发的把整个数据发出来
                         if (GroupMsg.SenderQQ == 1341806518) {
                             let as = []
                             as.push({ user_id: GroupMsg.SenderQQ, nickname: "小叶子", message: JSON.stringify(GroupMsg, null, "\t") })
@@ -84,6 +85,7 @@ client.on("internal.sso", function (cmd, payload, seq) {
                                     segment.xml(forwardMsg.data)
                                 ]
                                 qun.sendMsg(message);
+                                //如果是icqq,这里需要修改删除84~86行，qun.sendMsg(forwardMsg);
                             })
                         }
                         qun.recallMsg(GroupMsg.seq, GroupMsg.rand)
@@ -92,9 +94,9 @@ client.on("internal.sso", function (cmd, payload, seq) {
                 }
             }
             //这里解析储存所有消息,用来直接拿数据分析,可删除
-            decodePb(payload).then((json) => {
-                fs.writeFile("test.txt", JSON.stringify(json) + payload.toString("hex").toUpperCase(), (err, data) => { if (err) throw err; });
-            });
+            //decodePb(payload).then((json) => {
+            //    fs.writeFile("test.txt", JSON.stringify(json) + payload.toString("hex").toUpperCase(), (err, data) => { if (err) throw err; });
+            //});
         }
     } catch (err) {
         console.log(err)
