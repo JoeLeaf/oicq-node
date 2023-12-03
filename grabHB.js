@@ -7,7 +7,7 @@
 sb给爷死!
 
 
-91行         qun.recallMsg(GroupMsg.seq, GroupMsg.rand)      可以撤回红包消息
+91行         qun.recallMsg(GroupMsg.seq, GroupMsg.rand)      可以撤回红包消息 
 
 
 */
