@@ -168,7 +168,7 @@ async function getLOLFreeTreasureChest(name, cookies) {
     if (!RegionID) {
         return "未知大区"
     }
-    let url = `https://apps.game.qq.com/daoju/igw/main?_service=buy.plug.svr.sysc_ext&paytype=8&iActionId=22565&propid=338943&buyNum=1&_app_id=1006&_plug_id=72007&_biz_code=lol&areaid=${RegionID}&roleid=${QQ}&source=4_0&appext={%22sfileMD5%22:%22c994b8c773c61917396196a674585b57%22}&reportUserUin=` + QQ
+    let url = `https://apps.game.qq.com/daoju/igw/main?_service=buy.plug.svr.sysc_ext&paytype=8&iActionId=22565&propid=338943&buyNum=1&_app_id=1006&_plug_id=72007&_biz_code=lol&areaid=${RegionID}`;
     let response = await fetch(url, {
         "headers": {
             "cookie": cookies,
