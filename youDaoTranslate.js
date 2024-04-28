@@ -65,3 +65,4 @@ async function youDaoTranslate(text) {
   let s = r.update(resBase64, "base64", "utf-8");
   return s += r.final("utf-8")
 }
+
