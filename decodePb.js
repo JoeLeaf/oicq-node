@@ -1,10 +1,8 @@
-
-const { core } = require("oicq")
-const { unzipSync, deflateSync } = require("zlib")
-const zlib = require("zlib")
+const zlib = require("zlib");
+const protobuf = require("protobufjs");
+var JSON = require("json-bigint")({ useNativeBigInt: true });
 //传入buffer解析后返回json
 //一般来说都是hex,所以你需要以下操作,处理一下数据
-
 /*
 //删除str所有空格
 str = str.replace(/\s+/g, "");
@@ -12,103 +10,106 @@ str = str.replace(/\s+/g, "");
 if (str.substring(0, 4) == "0000") {
   str = str.substring(8);
 }
-let json = await decodePb(Buffer.from(str, 'hex'));
-*/
+let json = decodePb(Buffer.from(str, 'hex'));
 
-async function decodePb(buffer_data) {
-	let pb = core.pb;
-	let proto = pb.decode(buffer_data);
-	let json = {}
-	delete proto.encoded;
-	//console.log("小叶子调试",pb.decode(proto[3][1][2][1][1][1]));
-	let index = 0;
-	async function decode(proto, json) {
-		for (let key in proto) {
-			if (key == "encoded") {
-				continue;
-			}
-			if (proto[key] instanceof Object) {
-				if (proto[key] instanceof Array) {
-					json[key] = [];
-					for (let i = 0; i < proto[key].length; i++) {
-						json[key].push({});
-						decode(proto[key][i], json[key][i]);
-					}
-				} else {
-					try {
-						if (pb.decode(proto[key].encoded) == null) {
-							if (data.length > 3) {
-								let Prefix = ""
-								if (data[0] == 0x01 || data[0] == 0x00) {
-									Prefix = data.toString("hex").slice(0, 2);
-									data = data.slice(1);
-								}
-								let data_json = {}
-								data_json.Prefix = Prefix
-								if (data[0] == 0x78 && data[1] == 0x9c) {
-									Deflatedata = zlib.unzipSync(data);
-									// data_json.RawData = proto[key].encoded;
-									// data_json.DecompressedData =Deflatedata;
-									// data_json.CompressType = "Deflate"
-									data_json.txt = Deflatedata.toString();
-									data_json.tip = "数据被加密过,使用时请把数据加密回去 deflateSync()"
-									json[key] = data_json
-									decode(proto[key], json[key]);
-									continue;
-								} else {
-									json[key] = proto[key].encoded.toString();
-									decode(proto[key], json[key]);
-									continue;
-								}
-							}
-							json[key] = proto[key].encoded.toString();
-							decode(proto[key], json[key]);
-							continue;
-						}
-						json[key] = {};
-						decode(proto[key], json[key]);
-					} catch (error) {
-						let data = proto[key].encoded
-						if (data.length > 3) {
-							let Prefix = ""
-							if (data[0] == 0x01 || data[0] == 0x00) {
-								Prefix = data.toString("hex").slice(0, 2);
-								data = data.slice(1);
-							}
-							let data_json = {}
-							data_json.Prefix = Prefix
-							if (data[0] == 0x78 && data[1] == 0x9c) {
-								Deflatedata = zlib.unzipSync(data);
-								// data_json.RawData = proto[key].encoded;
-								// data_json.DecompressedData =Deflatedata;
-								// data_json.CompressType = "Deflate"
-								data_json.txt = Deflatedata.toString();
-								data_json.tip = "数据被加密过,使用时请把数据加密回去 deflateSync()"
-								json[key] = data_json
-								decode(proto[key], json[key]);
-								continue;
-							} else {
-								json[key] = proto[key].encoded.toString();
-								decode(proto[key], json[key]);
-								continue;
-							}
-						}
-						json[key] = proto[key].encoded.toString();
-						decode(proto[key], json[key]);
-						continue;
-					}
-				}
-			} else {
-				//console.log("小叶子调试",proto[key]);
-				let value = proto[key];
-				if (typeof value == "bigint") {
-					value = value.toString();
-					value = Number(value);
-				}
-				json[key] = value
-			}
-		}
-	}
-	decode(proto, json);
-	return json;
+//var JSON = require("json-bigint")({ useNativeBigInt: true });
+//使用json-bigint来替代JavaScript原生的解决bigint的问题
+
+//const protobuf = require("protobufjs");
+//请不要使用icqq或者oicq内的旧版本protobufjs。。。。
+
+//const zlib = require("zlib");
+//来解压QQ的GZIP数据，GZIP有多种类型自行完善所有的
+
+
+*/
+function long2int(long) {
+    if (long.high === 0) return long.low >>> 0;
+    const bigint = (BigInt(long.high) << 32n) | (BigInt(long.low) & 0xffffffffn);
+    const int = Number(bigint);
+    return Number.isSafeInteger(int) ? int : bigint;
+}
+function isReadable(hexString) {
+    try {
+        decodeURIComponent(hexString);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function decodePb(buf) {
+    const result = {}
+    const reader = new protobuf.Reader(buf);
+    while (reader.pos < reader.len) {
+        const k = reader.uint32();
+        const tag = k >> 3, type = k & 0b111;
+        // console.log(k, tag, type);
+        let value, decoded;
+        switch (type) {
+            case 0:
+                value = long2int(reader.int64());
+                break;
+            case 1:
+                value = long2int(reader.fixed64());
+                break;
+            case 2:
+                value = Buffer.from(reader.bytes());
+                if (value[0] == 0x01 || value[0] == 0x00) {
+                    const Prefix = value.toString("hex").slice(0, 2);
+                    let data = value.subarray(1);
+                    let data_json = {};
+                    data_json.Prefix = Prefix;
+                    if (data[0] == 0x78 && data[1] == 0x9c) {
+                        Deflatedata = zlib.unzipSync(data);
+                        data_json.txt = Deflatedata.toString();
+                        data_json.tip =
+                            "数据被加密过,使用时请把数据加密回去 deflateSync()";
+                        value = data_json
+                        break;
+                    }
+                }
+                try {
+                    decoded = decodePb(value);
+                } catch (error) {
+                    if (isReadable(value.toString('hex').replace(/(..)/g, '%$1').toUpperCase())) {
+                        decoded = value.toString()
+                    } else {
+                        decoded = value
+                    }
+                }
+                value = decoded
+                break;
+            case 3:
+
+                break;
+            case 4:
+
+                break;
+            case 5:
+                value = reader.fixed32();
+                break;
+            case 6:
+                break;
+            case 7:
+                if (isReadable(buf.toString('hex').replace(/(..)/g, '%$1').toUpperCase())) {
+                    return buf.toString()
+                } else {
+                    return buf
+                }
+            default:
+                return null;
+        }
+        if (Array.isArray(result[tag])) {
+            result[tag].push(value);
+        }
+        else if (Reflect.has(result, tag)) {
+            result[tag] = [result[tag]];
+            result[tag].push(value);
+        }
+        else {
+            result[tag] = value;
+        }
+    }
+    return result;
 }
