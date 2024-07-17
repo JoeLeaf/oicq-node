@@ -21,7 +21,7 @@ let json = decodePb(Buffer.from(str, 'hex'));
 //const zlib = require("zlib");
 //来解压QQ的GZIP数据，GZIP有多种类型自行完善所有的
 
-//这个有问题记得反馈一下，没完善完全
+//别问，问就是不会写瞎写的能跑，有BUG
 
 
 */
@@ -42,6 +42,21 @@ function isReadable(hexString) {
     }
 }
 
+
+function isToStr(buf) {
+    const bufHex = buf.toString('hex');
+    if (isReadable(bufHex.replace(/(..)/g, '%$1').toUpperCase())) {
+        return buf.toString()
+    } else if (
+        (bufHex.startsWith("5b") || bufHex.startsWith("7b"))
+        &&
+        (bufHex.endsWith("5d") || bufHex.endsWith("7d"))) {
+        return buf.toString()
+    } else {
+        return buf
+    }
+}
+
 function decodePb(buf) {
     const result = {}
     const reader = new protobuf.Reader(buf);
@@ -49,9 +64,6 @@ function decodePb(buf) {
         const k = reader.uint32();
         const tag = k >> 3, type = k & 0b111;
         let value, decoded;
-        if (tag == 14 && type == 1) {
-            console.log(k, tag, type);
-        }
         switch (type) {
             case 0:
                 value = long2int(reader.int64());
@@ -93,7 +105,7 @@ function decodePb(buf) {
                 value = reader.fixed32();
                 break;
             case 6:
-                break;
+                return isToStr(buf)
             case 7:
                 value === void 0 ? value = isToStr(buf) : value = isToStr(value);
                 break;
