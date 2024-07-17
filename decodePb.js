@@ -21,9 +21,13 @@ let json = decodePb(Buffer.from(str, 'hex'));
 //const zlib = require("zlib");
 //来解压QQ的GZIP数据，GZIP有多种类型自行完善所有的
 
+//这个有问题记得反馈一下，没完善完全
+
 
 */
 function long2int(long) {
+    if (long.high == undefined)
+        return Number(long)
     if (long.high === 0) return long.low >>> 0;
     const bigint = (BigInt(long.high) << 32n) | (BigInt(long.low) & 0xffffffffn);
     const int = Number(bigint);
@@ -44,8 +48,10 @@ function decodePb(buf) {
     while (reader.pos < reader.len) {
         const k = reader.uint32();
         const tag = k >> 3, type = k & 0b111;
-        // console.log(k, tag, type);
         let value, decoded;
+        if (tag == 14 && type == 1) {
+            console.log(k, tag, type);
+        }
         switch (type) {
             case 0:
                 value = long2int(reader.int64());
@@ -55,6 +61,7 @@ function decodePb(buf) {
                 break;
             case 2:
                 value = Buffer.from(reader.bytes());
+                // console.log(k, tag, type,value.toString());
                 if (value[0] == 0x01 || value[0] == 0x00) {
                     const Prefix = value.toString("hex").slice(0, 2);
                     let data = value.subarray(1);
@@ -72,16 +79,12 @@ function decodePb(buf) {
                 try {
                     decoded = decodePb(value);
                 } catch (error) {
-                    if (isReadable(value.toString('hex').replace(/(..)/g, '%$1').toUpperCase())) {
-                        decoded = value.toString()
-                    } else {
-                        decoded = value
-                    }
+                    decoded = isToStr(value)
                 }
                 value = decoded
                 break;
             case 3:
-
+                value === void 0 ? value = isToStr(buf) : value = isToStr(value);
                 break;
             case 4:
 
@@ -92,22 +95,17 @@ function decodePb(buf) {
             case 6:
                 break;
             case 7:
-                if (isReadable(buf.toString('hex').replace(/(..)/g, '%$1').toUpperCase())) {
-                    return buf.toString()
-                } else {
-                    return buf
-                }
+                value === void 0 ? value = isToStr(buf) : value = isToStr(value);
+                break;
             default:
                 return null;
         }
         if (Array.isArray(result[tag])) {
             result[tag].push(value);
-        }
-        else if (Reflect.has(result, tag)) {
+        } else if (Reflect.has(result, tag)) {
             result[tag] = [result[tag]];
             result[tag].push(value);
-        }
-        else {
+        } else {
             result[tag] = value;
         }
     }
