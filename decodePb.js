@@ -26,7 +26,7 @@ let json = decodePb(Buffer.from(str, 'hex'));
 
 */
 function long2int(long) {
-    if (long.high == undefined)
+    if (long.high ===  void 0)
         return Number(long)
     if (long.high === 0) return long.low >>> 0;
     const bigint = (BigInt(long.high) << 32n) | (BigInt(long.low) & 0xffffffffn);
@@ -64,6 +64,7 @@ function decodePb(buf) {
         const k = reader.uint32();
         const tag = k >> 3, type = k & 0b111;
         let value, decoded;
+        // console.log(k, tag, type);
         switch (type) {
             case 0:
                 value = long2int(reader.int64());
@@ -73,7 +74,6 @@ function decodePb(buf) {
                 break;
             case 2:
                 value = Buffer.from(reader.bytes());
-                // console.log(k, tag, type,value.toString());
                 if (value[0] == 0x01 || value[0] == 0x00) {
                     const Prefix = value.toString("hex").slice(0, 2);
                     let data = value.subarray(1);
@@ -95,22 +95,15 @@ function decodePb(buf) {
                 }
                 value = decoded
                 break;
-            case 3:
-                value === void 0 ? value = isToStr(buf) : value = isToStr(value);
-                break;
-            case 4:
-
-                break;
             case 5:
                 value = reader.fixed32();
                 break;
-            case 6:
-                return isToStr(buf)
-            case 7:
-                value === void 0 ? value = isToStr(buf) : value = isToStr(value);
-                break;
             default:
-                return null;
+                if (value === void 0) {
+                    return isToStr(buf)
+                } else {
+                    return isToStr(value)
+                }
         }
         if (Array.isArray(result[tag])) {
             result[tag].push(value);
