@@ -98,7 +98,7 @@ function decodePb(buf) {
                   }
               }
               try {
-                  decoded = decodePbDetailed(value);
+                  decoded = decodePb(value);
               } catch (error) {
                   decoded = isToStr(value);
               }
