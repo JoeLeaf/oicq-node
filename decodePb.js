@@ -83,7 +83,7 @@ function decodePb(buf) {
               value = Buffer.from(reader.bytes());
               
               if (value[0] == 0x01 || value[0] == 0x00) {
-                  console.log(value.toString("hex"));
+
                   const Prefix = value.toString("hex").slice(0, 2);
                   let data = value.subarray(1);
                   let data_json = {};
