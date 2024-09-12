@@ -13,6 +13,7 @@ async function textToSpeech(cookies, text, QQ) {
 		appid: '201908021016',
 		sendUin: parseInt(QQ),
 		text: text,
+		uin: parseInt(bot.uin)
 	};
 	const response = await fetch(url, {
 		method: 'POST',
