@@ -1,45 +1,37 @@
-const { core } = require("oicq")
-//tenpay.com 的cookies需要通过特殊办法获得,也可参照 https://github.com/JoeLeaf/OICQ-node/blob/main/%E7%89%B9%E6%AE%8ACookies%E8%8E%B7%E5%8F%96.txt
-
-//8.9.28.3700是版本号,可以改成框架同版本,但是我懒得查是啥方法.....
-
-
-
+const { pb } = require("@icqqjs/icqq/lib/core");
+//新版的取群未领取红包
+//传入群号
 
 async function getGroupRedPackList(qun) {
-    const tenpay_cookies = bot.cookies['tenpay.com']
-    let skey = getCookieValue(tenpay_cookies, 'skey')
-    const req = core.jce.encodeStruct([String(qun), 1, "8.9.28.3700", 1, String(bot.uin), skey, ""])
-    const getGroupRedPackList = core.jce.encodeWrapper(
-        { req },
-        "Wallet.GroupRedPackListServer.GroupRedPackListObj",
-        "getGroupRedPackList"
-    )
-    const response = await bot.sendUni("GroupRedPackListSvc.getGroupRedPackList", getGroupRedPackList)
-    let jce = core.jce.decode(response);
-    let rsp = core.jce.decode(jce[7])[0].rsp
-    let decodeRsp = core.jce.decode(rsp)
-    let str = ""
-    if (decodeRsp[0][1] == 0) {
-        return "没有未领取的红包"
-    } else {
-        let HBnum = decodeRsp[0][1]
-        str = []
-        for (let i = 0; i < HBnum; i++) {
-            const element = decodeRsp[0][2][i];
-            str.push({
-                "Sender": element[0],
-                "Title": element[1],
-                "Channel": element[2],
-                "Listid": element[3],
-                "Authkey": element[4]
-            })
-        }
-        return str
-    }
-}
-function getCookieValue(cookies, key) {
-    var e = new RegExp("(?:^| )" + key + "=([^;]*)(?:;|$)", "gi"),
-        n = e.exec(cookies);
-    return n ? unescape(n[1]) : ""
+  const body = {
+    1: "trpc.qqhb.records.UpForGrabs",
+    2: "GetUpForGrabs",
+    3: {
+      1: String(qun),
+    },
+    4: {
+      1: "cipher",
+      2: "plain",
+    },
+  };
+  const response = await bot.sendUni(
+    "trpc.qpay.gateway.Gateway.SsoHandle",
+    pb.encode(body)
+  );
+  const rsp = pb.decode(response);
+  if (rsp["3"]) {
+    rsp["3"] = Array.isArray(rsp["3"]) ? rsp["3"] : [rsp["3"]];
+    return rsp["3"].map((item) => {
+      const element = item["1"];
+      return {
+        Sender: element[0],
+        Title: String(element[1]),
+        Channel: String(element[2]),
+        Listid: String(element[3]),
+        Authkey: String(element[4]),
+      };
+    });
+  } else {
+    return "没有未领取的红包";
+  }
 }
