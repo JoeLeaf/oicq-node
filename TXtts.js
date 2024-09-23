@@ -1,16 +1,38 @@
 // const { pb } = require("icqq/lib/core");
 // const { pb } = require("oicq/lib/core");
 // 上面二选一，不需要花里胡哨的一大堆配置，我觉得麻烦
-// await TXtts("人面不知何处去，桃花依旧笑春风") 返回的是amr音频
+//返回音频文件为腾讯的slik_v3
 
+/*
+这个支持智能体声音
+const tts = await TXtts("我觉得这个世上这么多人，可是没有人想听我讲话。", {
+  autoTTS: 0,
+  businessID: 2,
+  clientVersion: "AND_537242082_9.0.95",
+  model: 1,
+  net: 1,
+  seq: 0,
+  sendUin: 3889008584,
+  voiceType: "dreamer-linwaner",
+  });
+if (typeof tts == "string") {
+  this.reply(tts, true);
+} else {
+  this.reply([segment.record(tts)]);
+}
 
-async function TXtts(text) {
+如果要智能体可以这样传入第二个值，如果不要，只传入文本即可
+*/
+async function TXtts(text, voiceType = {}) {
   const url = "https://textts.qq.com/cgi-bin/tts";
-  const params = {
+  let params = {
     appid: "201908021016",
-    sendUin: parseInt(bot.uin),
+    sendUin: 0,
     text: text,
+    uin: parseInt(bot.uin),
   };
+  params = { ...params, ...voiceType };
+  console.log(params);
   const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify(params),
@@ -20,7 +42,6 @@ async function TXtts(text) {
     },
   });
   const buffer = Buffer.from(await response.arrayBuffer());
-
   const ttsReader = buffer;
   let ttsWriter = Buffer.alloc(0);
   for (let i = 0; i < ttsReader.length; ) {
@@ -36,12 +57,13 @@ async function TXtts(text) {
     if (length == 0) {
       break;
     }
-    let ttsRsp = pb.decode(ttsReader.slice(i, i + length));
+    let ttsRsp = pb.decode(ttsReader.subarray(i, i + length));
     if (ttsRsp["1"] != 0) {
-      console.log("can't convert text to voice");
-      return;
+      console.log(ttsRsp["11"].toString());
+      return ttsRsp["11"].toString();
     }
     if (ttsRsp["4"]) {
+      ttsRsp["4"] = Array.isArray(ttsRsp["4"]) ? ttsRsp["4"] : [ttsRsp["4"]];
       for (let voiceItem of ttsRsp["4"]) {
         ttsWriter = Buffer.concat([ttsWriter, voiceItem["1"].encoded]);
       }
