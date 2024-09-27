@@ -57,6 +57,38 @@ function isToStr(buf) {
         return { "type": "hex", "data": buf.toString("hex").toUpperCase() }
     }
 }
+function isGzip(buf) {
+  if (buf.length < 8) {
+    return false;
+  }
+  let rsp = {
+    hex: buf.toString("hex"),
+  };
+  if (buf[0] == 0x01 || buf[0] == 0x00) {
+    rsp.head = buf.toString("hex").slice(0, 2);
+    rsp.tip="压缩后需要补充head值  ";
+    buf = buf.subarray(1);
+  }
+  const magicNumber = buf.readUInt16BE(0);
+  try {
+    let data;
+    if (magicNumber === 0x1f8b) {
+      data = zlib.unzipSync(buf);
+      rsp.type = "gzip";
+      rsp.tip+="使用zlib.gzipSync压缩 网页端可使用 paok.ungzip代替解压，pako.gzip压缩回去"
+    } else if (magicNumber === 0x789c) {
+      data = zlib.inflateSync(buf);
+      rsp.tip+="使用zlib.deflateSync压缩 网页端可使用 paok.inflate代替解压，pako.deflate压缩回去"
+      rsp.type = "deflate";
+    }
+    const str = isToStr(data);
+    if (typeof str === "string") rsp.str = str;
+    rsp.hex = data.toString("hex");
+    return rsp;
+  } catch (error) {
+    return false;
+  }
+}
 function decodePb(buf) {
   const result = {};
   const reader = new protobuf.Reader(buf);
@@ -83,19 +115,12 @@ function decodePb(buf) {
         break;
       case 2:
         value = Buffer.from(reader.bytes());
-        if (value[0] == 0x01 || value[0] == 0x00) {
-          const Prefix = value.toString("hex").slice(0, 2);
-          let data = value.subarray(1);
-          let data_json = {};
-          data_json.Prefix = Prefix;
-          if (data[0] == 0x78 && data[1] == 0x9c) {
-            Deflatedata = zlib.unzipSync(data);
-            data_json.txt = Deflatedata.toString();
-            data_json.tip = "数据被加密过,使用时请把数据加密回去 deflateSync()";
-            value = data_json;
-            break;
-          }
+        const gzip = isGzip(value);
+        if (gzip) {
+          value = gzip;
+          break;
         }
+        //gzip抽了出来，如果不需要解压，删除上面5行即可
         try {
           decoded = decodePb(value);
         } catch (error) {
