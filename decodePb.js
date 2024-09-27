@@ -58,77 +58,77 @@ function isToStr(buf) {
     }
 }
 function decodePb(buf) {
-    const result = {}
-    const reader = new protobuf.Reader(buf);
-    while (reader.pos < reader.len) {
-        const k = reader.uint32();
-        const tag = k >> 3, type = k & 0b111;
-        let value, decoded, temp;
-        if (tag > 25600) return isToStr(buf);
-        // console.log(tag,k,type,buf,"\n",buf.toString(),"\n");
-        switch (type) {
-            case 0:
-                temp = reader.int64();
-                value = long2int(temp);
-                break;
-            case 1:
-                temp = reader.double()
-                if (isNaN(temp) || temp.toString().includes("e")) {
-                    reader.pos = reader.pos - 8;
-                    value = long2int(reader.fixed64());
-                } else {
-                    value = temp;
-                }
-                break;
-            case 2:
-                value = Buffer.from(reader.bytes());
-                if (value[0] == 0x01 || value[0] == 0x00) {
-                    const Prefix = value.toString("hex").slice(0, 2);
-                    let data = value.subarray(1);
-                    let data_json = {};
-                    data_json.Prefix = Prefix;
-                    if (data[0] == 0x78 && data[1] == 0x9c) {
-                        Deflatedata = zlib.unzipSync(data);
-                        data_json.txt = Deflatedata.toString();
-                        data_json.tip =
-                            "数据被加密过,使用时请把数据加密回去 deflateSync()";
-                        value = data_json;
-                        break;
-                    }
-                }
-                try {
-                    decoded = decodePb(value);
-                } catch (error) {
-                    decoded = isToStr(value);
-                }
-                value = decoded;
-                break;
-            case 3:
-
-            case 5:
-                temp = reader.float();
-                if (isNaN(temp) || temp.toString().includes("e")) {
-                    reader.pos = reader.pos - 4;
-                    value = reader.fixed32();
-                } else {
-                    value = Number(temp.toFixed(13));
-                }
-                break;
-            default:
-                if (value === void 0) {
-                    return isToStr(buf);
-                } else {
-                    return isToStr(value);
-                }
-        }
-        if (Array.isArray(result[tag])) {
-            result[tag].push(value);
-        } else if (Reflect.has(result, tag)) {
-            result[tag] = [result[tag]];
-            result[tag].push(value);
+  const result = {};
+  const reader = new protobuf.Reader(buf);
+  while (reader.pos < reader.len) {
+    const k = reader.uint32();
+    const tag = k >> 3,
+      type = k & 0b111;
+    let value, decoded, temp;
+    if (tag > 25600 || tag < 0) return isToStr(buf);
+    // console.log(tag,k,type,buf,"\n",buf.toString(),"\n");
+    switch (type) {
+      case 0:
+        temp = reader.int64();
+        value = long2int(temp);
+        break;
+      case 1:
+        temp = reader.double();
+        if (isNaN(temp) || temp.toString().includes("e")) {
+          reader.pos = reader.pos - 8;
+          value = long2int(reader.fixed64());
         } else {
-            result[tag] = value;
+          value = temp;
+        }
+        break;
+      case 2:
+        value = Buffer.from(reader.bytes());
+        if (value[0] == 0x01 || value[0] == 0x00) {
+          const Prefix = value.toString("hex").slice(0, 2);
+          let data = value.subarray(1);
+          let data_json = {};
+          data_json.Prefix = Prefix;
+          if (data[0] == 0x78 && data[1] == 0x9c) {
+            Deflatedata = zlib.unzipSync(data);
+            data_json.txt = Deflatedata.toString();
+            data_json.tip = "数据被加密过,使用时请把数据加密回去 deflateSync()";
+            value = data_json;
+            break;
+          }
+        }
+        try {
+          decoded = decodePb(value);
+        } catch (error) {
+          decoded = isToStr(value);
+        }
+        value = decoded;
+        break;
+      case 3:
+
+      case 5:
+        temp = reader.float();
+        if (isNaN(temp) || temp.toString().includes("e")) {
+          reader.pos = reader.pos - 4;
+          value = reader.fixed32();
+        } else {
+          value = Number(temp.toFixed(13));
+        }
+        break;
+      default:
+        if (value === void 0) {
+          return isToStr(buf);
+        } else {
+          return isToStr(value);
         }
     }
-    return result;
+    if (Array.isArray(result[tag])) {
+      result[tag].push(value);
+    } else if (Reflect.has(result, tag)) {
+      result[tag] = [result[tag]];
+      result[tag].push(value);
+    } else {
+      result[tag] = value;
+    }
+  }
+  return result;
 }
