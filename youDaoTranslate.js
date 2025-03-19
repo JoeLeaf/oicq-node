@@ -2,6 +2,9 @@ const crypto = require("crypto");
 
 
 /*
+
+//key写成实时获取吧
+
 console.log(await youDaoTranslate("秋风不燥，时光不老，岁月静好，你我都好"));
 {
     "code": 0,
@@ -25,7 +28,11 @@ function youDaoSign(o, e) {
 function _md5(content) {
   return crypto.createHash("md5").update(content).digest("hex").toUpperCase();
 }
-async function youDaoTranslate(text) {
+async function getYDTranslate(text) {
+  const keyInfo = (await getYDKey()).data;
+  const secretKey = keyInfo.secretKey
+  const aesKey = keyInfo.aesKey
+  const aesIv = keyInfo.aesIv
   const o = new Date().getTime();
   const bodyJson = {
     "i": text,
@@ -34,7 +41,7 @@ async function youDaoTranslate(text) {
     "useTerm": "false",
     "dictResult": "true",
     "keyid": "webfanyi",
-    "sign": youDaoSign(o, "Vy4EQ1uwPkUoqvcP1nIu6WiAjxFeA3Y1"),
+    "sign": youDaoSign(o, secretKey),
     "client": "fanyideskweb",
     "product": "webfanyi",
     "appVersion": "1.0.0",
@@ -60,10 +67,33 @@ async function youDaoTranslate(text) {
     method: "POST",
   });
   const resBase64 = await res.text();
-  const key = Buffer.from("08149da73c59ce62555b01e92f34e838", "hex");
-  const iv = Buffer.from("d2bb1bfde83b38c344366357b79cae1c", "hex");
+  const key = Buffer.from(_md5(aesKey), "hex");
+  const iv = Buffer.from(_md5(aesIv), "hex");
   const r = crypto.createDecipheriv("aes-128-cbc", key, iv);
   let s = r.update(resBase64, "base64", "utf-8");
   return (s += r.final("utf-8"));
+}
+async function getYDKey() {
+  const o = new Date().getTime();
+  const bodyJson = {
+    "keyid": "webfanyi-key-getter",
+    "sign": youDaoSign(o, "asdjnjfenknafdfsdfsd"),
+    "client": "fanyideskweb",
+    "product": "webfanyi",
+    "appVersion": "1.0.0",
+    "vendor": "web",
+    "pointParam": "client,mysticTime,product",
+    "mysticTime": o,
+    "keyfrom": "fanyi.web",
+    "mid": "1",
+    "screen": "1",
+    "model": "1",
+    "network": "wifi",
+    "abtest": "0",
+    "yduuid": "abcdefg"
+  }
+  const res = await fetch(`https://dict.youdao.com/webtranslate/key?${new URLSearchParams(bodyJson).toString()}`, {
+  });
+  return await res.json();
 }
 
