@@ -5,7 +5,7 @@ const crypto = require("crypto");
 
 //key写成实时获取吧
 
-console.log(await youDaoTranslate("秋风不燥，时光不老，岁月静好，你我都好"));
+console.log(await getYDTranslate("秋风不燥，时光不老，岁月静好，你我都好"));
 {
     "code": 0,
     "dictResult": {},
